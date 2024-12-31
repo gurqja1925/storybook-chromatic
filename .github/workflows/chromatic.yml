@@ -1,24 +1,32 @@
-name: "Chromatic"
+# Workflow name
+name: "Chromatic Deployment"
 
+# Event for the workflow
 on: push
 
+# List of jobs
 jobs:
-  chromatic:
-    name: Run Chromatic
+  test:
+    # Operating System
     runs-on: ubuntu-latest
+    # Job steps
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4 # Update to the latest version of checkout action
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4 # Example of using a different action
         with:
-          node-version: 20
-      - name: Install dependencies
-        # ⚠️ See your package manager's documentation for the correct command to install dependencies in a CI environment.
-        run: npm ci
+          node-version: 16
+      - name: Cache Dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - run: yarn
       - name: Run Chromatic
-        uses: chromaui/action@latest
+        uses: chromaui/action@v1 # Update to the latest version of Chromatic action
         with:
-          # ⚠️ Make sure to configure a `CHROMATIC_PROJECT_TOKEN` repository secret
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
